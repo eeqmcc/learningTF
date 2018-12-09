@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import os
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,6 +16,8 @@ train_Y = 2 * train_X + np.random.randn(*train_X.shape) * 0.3
 plt.figure(1)
 plt.subplot(211)
 plt.plot(train_X, train_Y, 'ro', label='Original data')
+
+tf.reset_default_graph()
 
 inputdict = {
     'x': tf.placeholder('float'),
@@ -37,6 +40,7 @@ init = tf.global_variables_initializer()
 training_epochs = 20
 display_step = 2
 
+saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(init)
     plotdata = {'batchsize':[], 'loss':[], 'avgloss':[]}
@@ -64,5 +68,12 @@ with tf.Session() as sess:
     plt.ylabel('loss')
 
     print('x = 0.2, z =', sess.run(z, feed_dict={inputdict['x']:0.2}))
+    saver.save(sess, os.path.join('checkpoint', str(epoch)))
 
 plt.show()
+
+saver = tf.train.Saver()
+with tf.Session() as sess2:
+    sess2.run(tf.global_variables_initializer())
+    saver.restore(sess2, os.path.join('checkpoint', str(epoch)))
+    print('x = 0.2, z =', sess2.run(z, feed_dict={inputdict['x']:0.2}))
