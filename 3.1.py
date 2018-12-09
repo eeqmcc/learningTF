@@ -21,9 +21,12 @@ inputdict = {
     'y': tf.placeholder('float')
 }
 
-W = tf.Variable(tf.random_normal([1]), name='weight')
-b = tf.Variable(tf.zeros([1]), name='bias')
-z = tf.multiply(inputdict['x'], W) + b
+paradict = {
+    'w': tf.Variable(tf.random_normal([1]), name='weight'),
+    'b': tf.Variable(tf.zeros([1]), name='bias')
+}
+
+z = tf.multiply(inputdict['x'], paradict['w']) + paradict['b']
 
 cost = tf.reduce_mean(tf.square(inputdict['y'] - z))
 learning_rate = 0.01
@@ -42,15 +45,16 @@ with tf.Session() as sess:
             sess.run(optimizer, feed_dict={inputdict['x']:x, inputdict['y']:y})
 
         if epoch % display_step == 0:
-            loss = sess.run(cost, feed_dict={inputdict['x']:train_X, inputdict['y']:train_Y})
-            print('epoch', epoch+1, 'cost =', loss, 'W =', sess.run(W), 'b =', sess.run(b))
+            # loss = sess.run(cost, feed_dict={inputdict['x']:train_X, inputdict['y']:train_Y})
+            loss = cost.eval({inputdict['x']:train_X, inputdict['y']:train_Y})
+            print('epoch', epoch+1, 'cost =', loss, 'W =', sess.run(paradict['w']), 'b =', sess.run(paradict['b']))
             if not (loss == 'NA'):
                 plotdata['batchsize'].append(epoch)
                 plotdata['loss'].append(loss)
 
     print('Finished!')
-    print('cost =', loss, 'W =', sess.run(W), 'b =', sess.run(b))
-    plt.plot(train_X, sess.run(W) * train_X + sess.run(b), 'b+', label='Fitted_data')
+    print('cost =', loss, 'w =', sess.run(paradict['w']), 'b =', sess.run(paradict['b']))
+    plt.plot(train_X, sess.run(paradict['w']) * train_X + sess.run(paradict['b']), 'b+', label='Fitted_data')
     plt.legend()
 
     plotdata['avgloss'] = moving_average(plotdata['loss'])
