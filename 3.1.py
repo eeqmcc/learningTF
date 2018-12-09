@@ -16,14 +16,16 @@ plt.figure(1)
 plt.subplot(211)
 plt.plot(train_X, train_Y, 'ro', label='Original data')
 
-X = tf.placeholder('float')
-Y = tf.placeholder('float')
+inputdict = {
+    'x': tf.placeholder('float'),
+    'y': tf.placeholder('float')
+}
 
 W = tf.Variable(tf.random_normal([1]), name='weight')
 b = tf.Variable(tf.zeros([1]), name='bias')
-z = tf.multiply(X, W) + b
+z = tf.multiply(inputdict['x'], W) + b
 
-cost = tf.reduce_mean(tf.square(Y - z))
+cost = tf.reduce_mean(tf.square(inputdict['y'] - z))
 learning_rate = 0.01
 optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
@@ -37,10 +39,10 @@ with tf.Session() as sess:
     plotdata = {'batchsize':[], 'loss':[], 'avgloss':[]}
     for epoch in range(training_epochs):
         for (x, y) in zip(train_X, train_Y):
-            sess.run(optimizer, feed_dict={X:x, Y:y})
+            sess.run(optimizer, feed_dict={inputdict['x']:x, inputdict['y']:y})
 
         if epoch % display_step == 0:
-            loss = sess.run(cost, feed_dict={X:train_X, Y:train_Y})
+            loss = sess.run(cost, feed_dict={inputdict['x']:train_X, inputdict['y']:train_Y})
             print('epoch', epoch+1, 'cost =', loss, 'W =', sess.run(W), 'b =', sess.run(b))
             if not (loss == 'NA'):
                 plotdata['batchsize'].append(epoch)
@@ -57,6 +59,6 @@ with tf.Session() as sess:
     plt.xlabel('Minibatch number')
     plt.ylabel('loss')
 
-    print('x = 0.2, z =', sess.run(z, feed_dict={X:0.2}))
+    print('x = 0.2, z =', sess.run(z, feed_dict={inputdict['x']:0.2}))
 
 plt.show()
