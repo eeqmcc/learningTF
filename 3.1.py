@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-
+from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoint_file
 
 def moving_average(a, w=10):
     if len(a) < w:
@@ -76,4 +76,5 @@ saver = tf.train.Saver()
 with tf.Session() as sess2:
     sess2.run(tf.global_variables_initializer())
     saver.restore(sess2, os.path.join('checkpoint', str(epoch)))
+    print_tensors_in_checkpoint_file(os.path.join('checkpoint', str(epoch)), None, True)
     print('x = 0.2, z =', sess2.run(z, feed_dict={inputdict['x']:0.2}))
