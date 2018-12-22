@@ -44,7 +44,7 @@ input_labels = tf.placeholder(tf.float32, [None, lab_dim])
 W = tf.Variable(tf.random_normal([input_dim, lab_dim]), name='weight')
 b = tf.Variable(tf.zeros([lab_dim]), name='bias')
 
-output = tf.nn.sigmoid(tf.matmul(input_feature, W) + b)
+output = tf.nn.relu(tf.matmul(input_feature, W) + b)
 
 cross_entropy = -(input_labels * tf.log(output) + (1 - input_labels) * tf.log(1 - output))
 
