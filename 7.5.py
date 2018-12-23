@@ -15,12 +15,15 @@ n_classes = 10
 
 x = tf.placeholder(tf.float32, [None, n_input])
 y = tf.placeholder(tf.float32, [None, n_classes])
+keep_prob = tf.placeholder(tf.float32)
 
-def multilayer_perception(x, weights, biases):
+def multilayer_perception(x, weights, biases, keep_prob):
     layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
     layer_1 = tf.nn.relu(layer_1)
 
-    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    keep_layer_1 = tf.nn.dropout(layer_1, keep_prob)
+
+    layer_2 = tf.add(tf.matmul(keep_layer_1, weights['h2']), biases['b2'])
     layer_2 = tf.nn.relu(layer_2)
 
     outlayer = tf.matmul(layer_2, weights['out']) + biases['out']
@@ -38,7 +41,7 @@ biases = {
     'out': tf.Variable(tf.zeros([n_classes]))
 }
 
-pred = multilayer_perception(x, weights, biases)
+pred = multilayer_perception(x, weights, biases, keep_prob)
 
 reg = 0.01
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y)) + reg * (tf.nn.l2_loss(weights['h1']) + tf.nn.l2_loss(weights['h2']))
@@ -78,12 +81,12 @@ with tf.Session() as sess:
         for i in range(total_batch):
             x_batch = np.reshape(x_train[i * batch_size : (i + 1) * batch_size, :], (batch_size, -1))
             y_batch = y_train[i * batch_size : (i + 1) * batch_size]
-            _, c = sess.run([optimizer, cost], feed_dict={x: x_batch, y: y_batch})
-            p = sess.run(pred, feed_dict={x: x_batch})
+            _, c = sess.run([optimizer, cost], feed_dict={x: x_batch, y: y_batch, keep_prob: 0.7})
+            p = sess.run(pred, feed_dict={x: x_batch, keep_prob: 1.0})
             avg_cost += c / total_batch
         if (epoch + 1) % display_step == 0:
             correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
             accurary = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            print('Epoch', '%04d' % (epoch+1), 'cost =', avg_cost, 'accu =', accurary.eval({x: x_test, y: y_test}))
+            print('Epoch', '%04d' % (epoch+1), 'cost =', avg_cost, 'accu =', accurary.eval({x: x_test, y: y_test, keep_prob: 1.0}))
         saver.save(sess, model_path)
     print('Fnished!')
