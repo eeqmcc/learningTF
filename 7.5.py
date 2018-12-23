@@ -40,7 +40,8 @@ biases = {
 
 pred = multilayer_perception(x, weights, biases)
 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+reg = 0.01
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y)) + reg * (tf.nn.l2_loss(weights['h1']) + tf.nn.l2_loss(weights['h2']))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 
